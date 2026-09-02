@@ -34,4 +34,12 @@ export class InMemoryRefreshTokenRepository extends RefreshTokenRepository {
     }
     return Promise.resolve();
   }
+
+  deleteExpired(before: Date): Promise<number> {
+    const initial = this.items.length;
+    const remaining = this.items.filter((token) => token.expiresAt.getTime() >= before.getTime());
+    this.items.length = 0;
+    this.items.push(...remaining);
+    return Promise.resolve(initial - this.items.length);
+  }
 }
