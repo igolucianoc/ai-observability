@@ -132,6 +132,32 @@ const traceExplanationSchema = z.object({
   provider: z.string(),
 });
 
+const chatReplySchema = z.object({
+  traceId: z.string(),
+  status: executionStatus,
+  reply: z.string().nullable(),
+  model: z.string(),
+  provider: z.string(),
+  promptTokens: z.number(),
+  completionTokens: z.number(),
+  latencyMs: z.number(),
+});
+
+export type ChatReply = z.infer<typeof chatReplySchema>;
+
+const chatModelsSchema = z.object({
+  models: z.array(z.string()),
+  default: z.string(),
+});
+
+export type ChatModelsInfo = z.infer<typeof chatModelsSchema>;
+
+const clearDataSchema = z.object({
+  deletedTraces: z.number(),
+});
+
+export type ClearDataResult = z.infer<typeof clearDataSchema>;
+
 export interface AnalyticsFilterParams {
   projectId: string;
   from?: string;
@@ -194,6 +220,23 @@ export const api = {
   explainTrace(id: string): Promise<TraceExplanation> {
     return apiRequest(`/insights/traces/${encodeURIComponent(id)}/explain`, traceExplanationSchema, {
       method: 'POST',
+    }).then((r) => r.data);
+  },
+
+  chatModels(): Promise<ChatModelsInfo> {
+    return apiGet('/ai/models', chatModelsSchema);
+  },
+
+  chat(projectId: string, message: string, model?: string): Promise<ChatReply> {
+    return apiRequest('/ai/chat', chatReplySchema, {
+      method: 'POST',
+      body: JSON.stringify({ projectId, message, model }),
+    }).then((r) => r.data);
+  },
+
+  clearData(): Promise<ClearDataResult> {
+    return apiRequest('/analytics/data', clearDataSchema, {
+      method: 'DELETE',
     }).then((r) => r.data);
   },
 };

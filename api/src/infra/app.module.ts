@@ -8,6 +8,7 @@ import { HttpLoggingInterceptor } from './observability/http-logging.interceptor
 import { RequestContextMiddleware } from './observability/request-context.middleware';
 import { AnalyticsModule } from '@/modules/analytics/analytics.module';
 import { AuthModule } from '@/modules/auth/auth.module';
+import { ChatModule } from '@/modules/chat/chat.module';
 import { EventsModule } from '@/modules/events/events.module';
 import { HealthModule } from '@/modules/health/health.module';
 import { InsightsModule } from '@/modules/insights/insights.module';
@@ -27,6 +28,7 @@ import { TracingModule } from '@/modules/tracing/tracing.module';
     TracingModule,
     AnalyticsModule,
     InsightsModule,
+    ChatModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
@@ -36,6 +38,7 @@ import { TracingModule } from '@/modules/tracing/tracing.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(RequestContextMiddleware).forRoutes('*');
+    // `{*path}` is the path-to-regexp v8 syntax for "all routes" used by Nest 11.
+    consumer.apply(RequestContextMiddleware).forRoutes('{*path}');
   }
 }
