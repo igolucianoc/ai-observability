@@ -71,7 +71,7 @@ export function useDashboardData(params: DashboardParams): DashboardData {
       })
       .catch(() => {
         if (active) {
-          setError('Failed to load dashboard data.');
+          setError('Falha ao carregar os dados do dashboard.');
         }
       })
       .finally(() => {

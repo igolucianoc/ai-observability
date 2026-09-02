@@ -25,9 +25,9 @@ export function TracesTable({ traces, selectedId, onSelect }: TracesTableProps):
             <th className="py-8 pr-16 font-medium">Trace</th>
             <th className="py-8 pr-16 font-medium">Status</th>
             <th className="py-8 pr-16 font-medium">Início</th>
-            <th className="py-8 pr-16 text-right font-medium">Duração</th>
-            <th className="py-8 pr-16 text-right font-medium">Tokens</th>
-            <th className="py-8 text-right font-medium">Custo</th>
+            <th className="py-8 pr-16 font-medium">Duração</th>
+            <th className="py-8 pr-16 font-medium">Tokens</th>
+            <th className="py-8 font-medium">Custo</th>
           </tr>
         </thead>
         <tbody>
@@ -55,13 +55,13 @@ export function TracesTable({ traces, selectedId, onSelect }: TracesTableProps):
                 <StatusBadge status={trace.status} />
               </td>
               <td className="py-8 pr-16 text-graphite">{formatDateTime(trace.startedAt)}</td>
-              <td className="py-8 pr-16 text-right text-graphite">
+              <td className="py-8 pr-16 text-graphite">
                 {formatDurationMs(trace.durationMs)}
               </td>
-              <td className="py-8 pr-16 text-right text-graphite">
+              <td className="py-8 pr-16 text-graphite">
                 {formatNumber(trace.totalTokens)}
               </td>
-              <td className="py-8 text-right font-medium text-forest-ink">
+              <td className="py-8 font-medium text-forest-ink">
                 {formatCostUsd(trace.totalCostUsd)}
               </td>
             </tr>

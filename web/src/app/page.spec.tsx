@@ -39,7 +39,9 @@ describe('HomePage', () => {
     render(<HomePage />);
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /observabilidade/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { name: /ai observability hub/i, level: 1 }),
+      ).toBeInTheDocument();
     });
   });
 });

@@ -11,7 +11,9 @@ import {
   periodToFrom,
   type DashboardFilterValues,
 } from './dashboard-filters';
+import { ConfirmDialog } from './confirm-dialog';
 import { KpiCard } from './kpi-card';
+import { MiniChat } from './mini-chat';
 import { ModelBreakdown } from './model-breakdown';
 import { StreamIndicator } from './stream-indicator';
 import { TimeseriesChart } from './timeseries-chart';
@@ -82,6 +84,22 @@ export function Dashboard({ user, onLogout }: DashboardProps): ReactElement {
   }, [stream.lastEvent]);
 
   const modelOptions = data.models.map((m) => m.model);
+  const [clearing, setClearing] = useState(false);
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false);
+
+  const handleConfirmClearData = async (): Promise<void> => {
+    setClearing(true);
+    try {
+      await api.clearData();
+      setSelectedTraceId(null);
+      data.reload();
+      setConfirmClearOpen(false);
+    } catch {
+      // Erros de carregamento já são exibidos pelo hook ao recarregar.
+    } finally {
+      setClearing(false);
+    }
+  };
 
   return (
     <div className="mx-auto flex max-w-[var(--page-max-width)] flex-col gap-32 px-24 py-40">
@@ -94,9 +112,17 @@ export function Dashboard({ user, onLogout }: DashboardProps): ReactElement {
                 'linear-gradient(105deg, var(--color-pine) 0%, var(--color-emerald-pulse) 40%, #a3a02f 100%)',
             }}
           >
-            Observabilidade
+            AI Observability Hub
           </h1>
           <StreamIndicator status={stream.status} />
+          <button
+            type="button"
+            onClick={() => setConfirmClearOpen(true)}
+            disabled={clearing}
+            className="rounded-full border border-signal-red px-16 py-8 text-caption font-medium text-signal-red hover:bg-[#fef2f2] disabled:opacity-60"
+          >
+            {clearing ? 'Limpando…' : 'Limpar dados'}
+          </button>
           {data.loading ? (
             <span className="text-caption text-graphite" aria-live="polite">
               Carregando…
@@ -156,6 +182,12 @@ export function Dashboard({ user, onLogout }: DashboardProps): ReactElement {
       </Card>
 
       <TraceDetailPanel traceId={selectedTraceId} onClose={() => setSelectedTraceId(null)} />
+
+      <MiniChat
+        projects={projects}
+        defaultProjectId={projectId}
+        onMessageSent={data.reload}
+      />
     </div>
   );
 }

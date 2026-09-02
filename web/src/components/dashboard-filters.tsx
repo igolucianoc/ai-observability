@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
 import type { ProjectSummary } from '@/types/analytics';
 
 export interface DashboardFilterValues {
@@ -15,8 +15,18 @@ interface DashboardFiltersProps {
   onChange: (next: DashboardFilterValues) => void;
 }
 
+// Select com aparência nativa removida e uma seta (chevron) customizada.
+// A imagem/posição vão via `selectStyle` (CSS puro) para não depender do parser
+// de classes arbitrárias do Tailwind com data-URI, que falhava silenciosamente.
 const selectClass =
-  'rounded-full border border-hairline bg-snow px-16 py-8 text-body text-forest-ink';
+  'cursor-pointer appearance-none rounded-full border border-hairline bg-snow py-8 pl-16 pr-40 text-body text-forest-ink';
+
+const selectStyle: CSSProperties = {
+  backgroundImage:
+    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%233f6b52' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\")",
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'right 16px center',
+};
 
 /**
  * Filter bar: project, period, status and model. Fully controlled.
@@ -33,6 +43,7 @@ export function DashboardFilters({
         Projeto
         <select
           className={selectClass}
+          style={selectStyle}
           value={value.projectId}
           onChange={(e) => onChange({ ...value, projectId: e.target.value })}
         >
@@ -48,6 +59,7 @@ export function DashboardFilters({
         Período
         <select
           className={selectClass}
+          style={selectStyle}
           value={value.period}
           onChange={(e) => onChange({ ...value, period: e.target.value as DashboardFilterValues['period'] })}
         >
@@ -62,6 +74,7 @@ export function DashboardFilters({
         Status
         <select
           className={selectClass}
+          style={selectStyle}
           value={value.status}
           onChange={(e) => onChange({ ...value, status: e.target.value as DashboardFilterValues['status'] })}
         >
@@ -76,6 +89,7 @@ export function DashboardFilters({
         Modelo
         <select
           className={selectClass}
+          style={selectStyle}
           value={value.model}
           onChange={(e) => onChange({ ...value, model: e.target.value })}
         >

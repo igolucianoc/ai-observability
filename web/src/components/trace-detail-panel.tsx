@@ -96,7 +96,7 @@ export function TraceDetailPanel({ traceId, onClose }: TraceDetailPanelProps): R
       const result = await api.explainTrace(traceId);
       setExplanation(result.explanation);
     } catch {
-      setExplanation('Could not generate an explanation right now.');
+      setExplanation('Não foi possível gerar uma explicação agora.');
     } finally {
       setExplaining(false);
     }
@@ -140,14 +140,14 @@ export function TraceDetailPanel({ traceId, onClose }: TraceDetailPanelProps): R
 
           <section className="flex flex-col gap-8">
             <div className="flex items-center justify-between">
-              <h3 className="text-caption font-medium uppercase text-graphite">AI explanation</h3>
+              <h3 className="text-caption font-medium uppercase text-graphite">Explicação por IA</h3>
               <button
                 type="button"
                 onClick={handleExplain}
                 disabled={explaining}
                 className="rounded-full bg-emerald-pulse px-16 py-8 text-caption font-medium text-snow disabled:opacity-60"
               >
-                {explaining ? 'Analyzing…' : 'Explain with AI'}
+                {explaining ? 'Analisando…' : 'Explicar com IA'}
               </button>
             </div>
             {explanation ? (

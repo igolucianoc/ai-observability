@@ -17,14 +17,14 @@ export function ModelBreakdown({ items }: { items: ModelBreakdownItem[] }): Reac
           key={item.model}
           className="flex items-center justify-between border-b border-hairline py-8 last:border-b-0"
         >
-          <span className="font-[family-name:var(--font-ui-monospace)] text-body text-forest-ink">
+          <span className="min-w-0 truncate font-[family-name:var(--font-ui-monospace)] text-body text-forest-ink">
             {item.model}
           </span>
-          <div className="flex gap-24 text-caption text-graphite">
+          <div className="flex flex-none items-center gap-24 text-caption text-graphite">
             <span>{formatNumber(item.requests)} req</span>
             <span>{formatNumber(item.totalTokens)} tok</span>
             <span>{formatDurationMs(item.avgLatencyMs)}</span>
-            <span className="w-64 text-right font-medium text-forest-ink">
+            <span className="text-right font-medium text-forest-ink">
               {formatCostUsd(item.totalCostUsd)}
             </span>
           </div>

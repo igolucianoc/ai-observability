@@ -6,11 +6,13 @@ export function formatNumber(value: number): string {
 
 export function formatCostUsd(value: string | number): string {
   const num = typeof value === 'string' ? Number(value) : value;
+  // Custos de inferência podem ser frações de centavo. Usamos sempre 6 casas
+  // decimais para uma exibição consistente em todo o dashboard.
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'USD',
-    minimumFractionDigits: num < 1 ? 4 : 2,
-    maximumFractionDigits: num < 1 ? 4 : 2,
+    minimumFractionDigits: 6,
+    maximumFractionDigits: 6,
   }).format(num);
 }
 
