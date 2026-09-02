@@ -8,6 +8,7 @@ import { AnalyticsModule } from '@/modules/analytics/analytics.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { EventsModule } from '@/modules/events/events.module';
 import { HealthModule } from '@/modules/health/health.module';
+import { ProjectsModule } from '@/modules/projects/projects.module';
 import { TracingModule } from '@/modules/tracing/tracing.module';
 
 @Module({
@@ -19,6 +20,7 @@ import { TracingModule } from '@/modules/tracing/tracing.module';
     AuthModule,
     HealthModule,
     EventsModule,
+    ProjectsModule,
     TracingModule,
     AnalyticsModule,
   ],
