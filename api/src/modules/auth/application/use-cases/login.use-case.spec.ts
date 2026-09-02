@@ -26,9 +26,9 @@ describe('LoginUseCase', () => {
   });
 
   it('rejects an unknown email with a generic error', async () => {
-    await expect(login.execute({ email: 'nobody@example.com', password: 'x' })).rejects.toBeInstanceOf(
-      InvalidCredentialsError,
-    );
+    await expect(
+      login.execute({ email: 'nobody@example.com', password: 'x' }),
+    ).rejects.toBeInstanceOf(InvalidCredentialsError);
   });
 
   it('rejects a wrong password with a generic error', async () => {

@@ -29,7 +29,10 @@ describe('RefreshTokenUseCase', () => {
   });
 
   it('rotates the token: old one is revoked and a new one is issued in the same family', async () => {
-    const session = await login.execute({ email: 'user@example.com', password: 'correct-password' });
+    const session = await login.execute({
+      email: 'user@example.com',
+      password: 'correct-password',
+    });
     const originalFamily = refreshTokens.items[0].familyId;
 
     const rotated = await refresh.execute({ refreshToken: session.refreshToken });
@@ -49,7 +52,10 @@ describe('RefreshTokenUseCase', () => {
   });
 
   it('detects reuse: replaying a rotated token revokes the whole family', async () => {
-    const session = await login.execute({ email: 'user@example.com', password: 'correct-password' });
+    const session = await login.execute({
+      email: 'user@example.com',
+      password: 'correct-password',
+    });
     // First rotation consumes the original token.
     await refresh.execute({ refreshToken: session.refreshToken });
 
