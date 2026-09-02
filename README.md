@@ -57,7 +57,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
-- Web: http://localhost:3000
+- Web: http://localhost:53000
 - API: http://localhost:3333
 
 > Se as portas 3000, 3333, 5432 ou 6379 já estiverem em uso na sua máquina, sobrescreva as portas
