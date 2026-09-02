@@ -183,6 +183,18 @@ export function Dashboard({ user, onLogout }: DashboardProps): ReactElement {
 
       <TraceDetailPanel traceId={selectedTraceId} onClose={() => setSelectedTraceId(null)} />
 
+      <ConfirmDialog
+        open={confirmClearOpen}
+        title="Limpar dados de observabilidade"
+        description="Isso vai apagar permanentemente todos os traces dos seus projetos. Esta ação não pode ser desfeita."
+        confirmLabel={clearing ? 'Limpando…' : 'Limpar tudo'}
+        cancelLabel="Cancelar"
+        destructive
+        busy={clearing}
+        onConfirm={handleConfirmClearData}
+        onCancel={() => setConfirmClearOpen(false)}
+      />
+
       <MiniChat
         projects={projects}
         defaultProjectId={projectId}
