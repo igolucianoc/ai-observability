@@ -31,9 +31,10 @@ COPY --from=build /app/api/prisma ./api/prisma
 COPY api/package.json ./api/package.json
 COPY api/prisma.config.ts ./api/prisma.config.ts
 COPY api/docker-entrypoint.sh ./api/docker-entrypoint.sh
-RUN chmod +x ./api/docker-entrypoint.sh
 
 WORKDIR /app/api
 EXPOSE 3333
-ENTRYPOINT ["./docker-entrypoint.sh"]
+# Invoke via `sh` so the script runs regardless of the executable bit or line
+# endings that a COPY might not preserve.
+ENTRYPOINT ["sh", "./docker-entrypoint.sh"]
 CMD ["node", "dist/infra/main.js"]

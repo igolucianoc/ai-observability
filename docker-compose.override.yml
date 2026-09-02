@@ -1,0 +1,75 @@
+# Development override — applied automatically by `docker compose up`.
+#
+# Substitui os serviços de produção (build standalone, sem reload) por serviços
+# em modo watch com hot-reload:
+#   - api: `nest start --watch` (recompila a cada alteração em api/src)
+#   - web: `next dev` (Fast Refresh a cada alteração em web/src)
+#
+# O código-fonte é montado como volume, então editar arquivos no host reflete
+# imediatamente no container. `node_modules` fica em volume nomeado para não
+# ser encoberto pelo bind mount do host.
+#
+# Uso:
+#   Desenvolvimento (hot-reload):  docker compose up
+#   Produção (build standalone):   docker compose -f docker-compose.yml up --build
+
+services:
+  api:
+    image: node:22-alpine
+    working_dir: /app
+    # Anula o ENTRYPOINT do Dockerfile de produção (docker-entrypoint.sh).
+    # `[""]` é a forma que o Compose reconhece para limpar o entrypoint herdado
+    # (entrypoint: null é ignorado e mantém o do Dockerfile). O comando vai como
+    # lista ["sh","-c","<script>"] para o script inteiro chegar como um único
+    # argumento ao `-c`.
+    entrypoint: ['']
+    command:
+      - sh
+      - -c
+      - >-
+        npm ci &&
+        npm run prisma:generate --workspace api &&
+        npm run prisma:migrate --workspace api &&
+        npm run start:dev --workspace api
+    environment:
+      NODE_ENV: development
+      RUN_DB_SEED: ${RUN_DB_SEED:-false}
+      # prisma.config.ts does not read .env, so pass the connection + secrets here.
+      DATABASE_URL: ${DATABASE_URL:-postgresql://aiobs:aiobs@postgres:5432/ai_observability?schema=public}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      API_CORS_ORIGINS: ${API_CORS_ORIGINS:-http://localhost:3000}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-change-me-access-secret-min-16-chars}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-refresh-secret-min-16-chars}
+    volumes:
+      - ./:/app
+      - api-node-modules:/app/node_modules
+    ports:
+      - '${API_PORT:-3333}:3333'
+
+  web:
+    image: node:22-alpine
+    working_dir: /app
+    entrypoint: ['']
+    command:
+      - sh
+      - -c
+      - >-
+        npm ci &&
+        npm run dev --workspace web
+    environment:
+      NODE_ENV: development
+      # No dev, a URL da API é lida em runtime pelo browser; não precisa de build arg.
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3333}
+      # Habilita polling do watcher, necessário em alguns bind mounts (ex.: WSL/Docker Desktop).
+      WATCHPACK_POLLING: 'true'
+    volumes:
+      - ./:/app
+      - web-node-modules:/app/node_modules
+      - web-next-cache:/app/web/.next
+    ports:
+      - '${WEB_PORT:-3000}:3000'
+
+volumes:
+  api-node-modules:
+  web-node-modules:
+  web-next-cache:
