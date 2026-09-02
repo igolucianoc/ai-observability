@@ -16,7 +16,7 @@ export const envSchema = z.object({
         .map((origin) => origin.trim())
         .filter((origin) => origin.length > 0),
     ),
-  DATABASE_URL: z.string().url().optional(),
+  DATABASE_URL: z.string().url(),
   REDIS_URL: z.string().url().optional(),
 });
 
