@@ -1,5 +1,6 @@
-import type { CSSProperties, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import type { ProjectSummary } from '@/types/analytics';
+import { Select } from './select';
 
 export interface DashboardFilterValues {
   projectId: string;
@@ -15,19 +16,6 @@ interface DashboardFiltersProps {
   onChange: (next: DashboardFilterValues) => void;
 }
 
-// Select com aparência nativa removida e uma seta (chevron) customizada.
-// A imagem/posição vão via `selectStyle` (CSS puro) para não depender do parser
-// de classes arbitrárias do Tailwind com data-URI, que falhava silenciosamente.
-const selectClass =
-  'cursor-pointer appearance-none rounded-full border border-hairline bg-snow py-8 pl-16 pr-40 text-body text-forest-ink';
-
-const selectStyle: CSSProperties = {
-  backgroundImage:
-    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%233f6b52' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\")",
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'right 16px center',
-};
-
 /**
  * Filter bar: project, period, status and model. Fully controlled.
  */
@@ -41,9 +29,7 @@ export function DashboardFilters({
     <div className="flex flex-wrap items-center gap-16">
       <label className="flex items-center gap-8 text-caption text-graphite">
         Projeto
-        <select
-          className={selectClass}
-          style={selectStyle}
+        <Select
           value={value.projectId}
           onChange={(e) => onChange({ ...value, projectId: e.target.value })}
         >
@@ -52,14 +38,12 @@ export function DashboardFilters({
               {project.name}
             </option>
           ))}
-        </select>
+        </Select>
       </label>
 
       <label className="flex items-center gap-8 text-caption text-graphite">
         Período
-        <select
-          className={selectClass}
-          style={selectStyle}
+        <Select
           value={value.period}
           onChange={(e) => onChange({ ...value, period: e.target.value as DashboardFilterValues['period'] })}
         >
@@ -67,14 +51,12 @@ export function DashboardFilters({
           <option value="7d">Últimos 7 dias</option>
           <option value="30d">Últimos 30 dias</option>
           <option value="all">Todo o período</option>
-        </select>
+        </Select>
       </label>
 
       <label className="flex items-center gap-8 text-caption text-graphite">
         Status
-        <select
-          className={selectClass}
-          style={selectStyle}
+        <Select
           value={value.status}
           onChange={(e) => onChange({ ...value, status: e.target.value as DashboardFilterValues['status'] })}
         >
@@ -82,14 +64,12 @@ export function DashboardFilters({
           <option value="SUCCESS">Sucesso</option>
           <option value="ERROR">Erro</option>
           <option value="TIMEOUT">Timeout</option>
-        </select>
+        </Select>
       </label>
 
       <label className="flex items-center gap-8 text-caption text-graphite">
         Modelo
-        <select
-          className={selectClass}
-          style={selectStyle}
+        <Select
           value={value.model}
           onChange={(e) => onChange({ ...value, model: e.target.value })}
         >
@@ -99,7 +79,7 @@ export function DashboardFilters({
               {model}
             </option>
           ))}
-        </select>
+        </Select>
       </label>
     </div>
   );

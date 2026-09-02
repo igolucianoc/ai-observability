@@ -5,6 +5,8 @@ import { api, type ChatReply } from '@/lib/api';
 import { ApiError } from '@/lib/api-client';
 import { formatDurationMs, formatNumber } from '@/lib/format';
 import type { ProjectSummary } from '@/types/analytics';
+import { MarkdownMessage } from './markdown-message';
+import { Select } from './select';
 
 interface MiniChatProps {
   projects: ProjectSummary[];
@@ -188,10 +190,10 @@ export function MiniChat({
         <div className="flex flex-col gap-8 border-b border-hairline p-24">
           <label className="flex flex-col gap-8 text-caption text-graphite">
             Projeto vinculado
-            <select
+            <Select
               value={projectId}
               onChange={(e) => setProjectId(e.target.value)}
-              className="rounded-full border border-hairline bg-snow px-16 py-8 text-body text-forest-ink"
+              className="w-full"
             >
               {projects.length === 0 ? <option value="">Nenhum projeto</option> : null}
               {projects.map((project) => (
@@ -199,15 +201,15 @@ export function MiniChat({
                   {project.name}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           <label className="flex flex-col gap-8 text-caption text-graphite">
             Modelo de IA
-            <select
+            <Select
               value={model}
               onChange={(e) => setModel(e.target.value)}
               disabled={models.length === 0}
-              className="rounded-full border border-hairline bg-snow px-16 py-8 font-[family-name:var(--font-ui-monospace)] text-body text-forest-ink disabled:opacity-60"
+              className="w-full font-[family-name:var(--font-ui-monospace)]"
             >
               {models.length === 0 ? <option value="">Modelo padrão</option> : null}
               {models.map((m) => (
@@ -215,7 +217,7 @@ export function MiniChat({
                   {m}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           <span className="text-caption text-graphite">
             As mensagens abaixo serão registradas como traces em{' '}
@@ -248,7 +250,11 @@ export function MiniChat({
                     : 'border border-hairline bg-paper text-forest-ink'
                 }`}
               >
-                {turn.text}
+                {turn.role === 'assistant' ? (
+                  <MarkdownMessage content={turn.text} />
+                ) : (
+                  turn.text
+                )}
               </div>
               {turn.meta ? (
                 <span className="flex flex-wrap gap-8 px-8 text-caption text-graphite">

@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactElement } from 'react';
 import { api } from '@/lib/api';
 import { formatCostUsd, formatDateTime, formatDurationMs, formatNumber } from '@/lib/format';
 import type { TraceDetail, TraceDetailSpan } from '@/types/analytics';
+import { MarkdownMessage } from './markdown-message';
 import { StatusBadge } from './status-badge';
 
 interface TraceDetailPanelProps {
@@ -55,10 +56,50 @@ export function TraceDetailPanel({ traceId, onClose }: TraceDetailPanelProps): R
   const [loading, setLoading] = useState(false);
   const [explanation, setExplanation] = useState<string | null>(null);
   const [explaining, setExplaining] = useState(false);
+  // Mantém o drawer montado enquanto abre/fecha e controla o slide (translate-x),
+  // espelhando o comportamento do drawer do mini chat.
+  const [mounted, setMounted] = useState(false);
+  const [show, setShow] = useState(false);
+
+  const open = traceId !== null;
+
+  // Orquestra a entrada/saída animada: monta, depois ativa o slide; ao fechar,
+  // desliza para fora e só então desmonta.
+  useEffect(() => {
+    if (open) {
+      setMounted(true);
+      const raf = requestAnimationFrame(() => setShow(true));
+      return () => cancelAnimationFrame(raf);
+    }
+    setShow(false);
+    const timer = setTimeout(() => {
+      setMounted(false);
+      // Limpa o conteúdo só depois que o drawer terminou de deslizar para fora.
+      setDetail(null);
+      setExplanation(null);
+      setError(null);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [open]);
+
+  // Fecha com a tecla Escape.
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
 
   useEffect(() => {
     if (!traceId) {
-      setDetail(null);
+      // Não zera `detail` aqui: mantém o conteúdo visível durante a animação de
+      // saída do drawer. A limpeza real acontece ao desmontar (efeito abaixo).
       return;
     }
     let active = true;
@@ -102,16 +143,30 @@ export function TraceDetailPanel({ traceId, onClose }: TraceDetailPanelProps): R
     }
   };
 
-  if (!traceId) {
+  if (!mounted) {
     return null;
   }
 
   return (
-    <aside
-      className="fixed right-0 top-0 z-10 flex h-full w-full max-w-xl flex-col gap-24 overflow-y-auto border-l border-hairline bg-snow p-32"
-      style={{ boxShadow: 'var(--shadow-subtle)' }}
-      aria-label="Detalhe do trace"
-    >
+    <>
+      {/* Overlay: fecha o drawer ao clicar fora */}
+      <div
+        className={`fixed inset-0 z-30 bg-forest-ink/20 transition-opacity duration-300 ${
+          show ? 'opacity-100' : 'opacity-0'
+        }`}
+        onClick={onClose}
+        aria-hidden
+      />
+
+      {/* Drawer lateral (desliza da direita) */}
+      <aside
+        className={`fixed right-0 top-0 z-40 flex h-full w-full max-w-xl flex-col gap-24 overflow-y-auto border-l border-hairline bg-snow p-32 transition-transform duration-300 ease-out ${
+          show ? 'translate-x-0' : 'translate-x-full'
+        }`}
+        style={{ boxShadow: 'var(--shadow-subtle)' }}
+        aria-hidden={!open}
+        aria-label="Detalhe do trace"
+      >
       <div className="flex items-start justify-between">
         <h2 className="font-[family-name:var(--font-inter-tight)] text-heading-sm font-semibold text-forest-ink">
           {detail?.name ?? 'Detalhe do trace'}
@@ -151,9 +206,9 @@ export function TraceDetailPanel({ traceId, onClose }: TraceDetailPanelProps): R
               </button>
             </div>
             {explanation ? (
-              <p className="rounded-2xl border border-hairline bg-mint-mist p-16 text-body text-forest-ink">
-                {explanation}
-              </p>
+              <div className="rounded-2xl border border-hairline bg-mint-mist p-16 text-body text-forest-ink">
+                <MarkdownMessage content={explanation} />
+              </div>
             ) : null}
           </section>
 
@@ -182,6 +237,7 @@ export function TraceDetailPanel({ traceId, onClose }: TraceDetailPanelProps): R
           ) : null}
         </>
       ) : null}
-    </aside>
+      </aside>
+    </>
   );
 }
