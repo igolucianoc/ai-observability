@@ -17,14 +17,19 @@ FROM base AS build
 COPY --from=deps /app/node_modules ./node_modules
 COPY package.json package-lock.json ./
 COPY api ./api
+# Generate the Prisma client into node_modules before compiling.
+RUN npm run prisma:generate --workspace api
 RUN npm run build --workspace api
 
 # ---- Runtime ----
 FROM base AS runtime
 ENV NODE_ENV=production
-COPY --from=deps /app/node_modules ./node_modules
+# node_modules from the build stage includes the generated Prisma client.
+COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/api/dist ./api/dist
+COPY --from=build /app/api/prisma ./api/prisma
 COPY api/package.json ./api/package.json
+COPY api/prisma.config.ts ./api/prisma.config.ts
 COPY api/docker-entrypoint.sh ./api/docker-entrypoint.sh
 RUN chmod +x ./api/docker-entrypoint.sh
 
