@@ -42,6 +42,11 @@ services:
       API_CORS_ORIGINS: ${API_CORS_ORIGINS:-http://localhost:3000}
       DATABASE_URL: ${DATABASE_URL:-postgresql://aiobs:aiobs@postgres:5432/ai_observability?schema=public}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-change-me-access-secret-min-16-chars}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-refresh-secret-min-16-chars}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-900}
+      JWT_REFRESH_TTL: ${JWT_REFRESH_TTL:-604800}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
     ports:
       - '${API_PORT:-3333}:3333'
     depends_on:
