@@ -1,34 +1,24 @@
+'use client';
+
 import type { ReactElement } from 'react';
-import { StatusPill } from '@/components/status-pill';
+import { Dashboard } from '@/components/dashboard';
+import { LoginForm } from '@/components/login-form';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function HomePage(): ReactElement {
-  return (
-    <main className="mx-auto flex min-h-screen max-w-[var(--page-max-width)] flex-col items-center justify-center gap-32 px-24 py-96 text-center">
-      <StatusPill label="Bootstrap ready" />
+  const auth = useAuth();
 
-      <h1
-        className="max-w-3xl font-[family-name:var(--font-inter-tight)] text-heading-lg font-semibold tracking-tight text-forest-ink sm:text-display sm:leading-none"
-        style={{
-          backgroundImage: 'linear-gradient(to right, #007a55, #00bc7d, #f59e0b)',
-          WebkitBackgroundClip: 'text',
-          backgroundClip: 'text',
-          color: 'transparent',
-        }}
-      >
-        AI Observability Hub
-      </h1>
+  if (auth.state === 'loading') {
+    return (
+      <main className="flex min-h-screen items-center justify-center">
+        <p className="text-body text-graphite">Loading…</p>
+      </main>
+    );
+  }
 
-      <p className="max-w-xl text-body text-graphite">
-        Tracing, tokens, cost, latency and metrics for AI applications.
-      </p>
+  if (auth.state === 'anonymous' || !auth.user) {
+    return <LoginForm onSubmit={auth.login} error={auth.error} />;
+  }
 
-      <a
-        href="/api/health"
-        className="inline-flex items-center gap-8 rounded-full bg-emerald-pulse px-24 py-8 text-body font-medium text-snow"
-        style={{ boxShadow: 'var(--shadow-subtle)' }}
-      >
-        Check API health
-      </a>
-    </main>
-  );
+  return <Dashboard user={auth.user} onLogout={auth.logout} />;
 }
