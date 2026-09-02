@@ -87,8 +87,14 @@ export function Dashboard({ user, onLogout }: DashboardProps): ReactElement {
     <div className="mx-auto flex max-w-[var(--page-max-width)] flex-col gap-32 px-24 py-40">
       <header className="flex flex-wrap items-center justify-between gap-16">
         <div className="flex items-center gap-16">
-          <h1 className="font-[family-name:var(--font-inter-tight)] text-heading font-semibold text-forest-ink">
-            Observability
+          <h1
+            className="font-[family-name:var(--font-inter-tight)] text-heading font-semibold text-transparent bg-clip-text"
+            style={{
+              backgroundImage:
+                'linear-gradient(105deg, var(--color-pine) 0%, var(--color-emerald-pulse) 40%, #a3a02f 100%)',
+            }}
+          >
+            Observabilidade
           </h1>
           <StreamIndicator status={stream.status} />
         </div>
@@ -99,7 +105,7 @@ export function Dashboard({ user, onLogout }: DashboardProps): ReactElement {
             onClick={onLogout}
             className="rounded-full border border-hairline px-16 py-8 text-forest-ink hover:bg-paper"
           >
-            Sign out
+            Sair
           </button>
         </div>
       </header>
@@ -114,25 +120,25 @@ export function Dashboard({ user, onLogout }: DashboardProps): ReactElement {
       {data.error ? <p className="text-body text-signal-red">{data.error}</p> : null}
 
       <div className="grid grid-cols-2 gap-16 md:grid-cols-4">
-        <KpiCard label="Requests" value={formatNumber(data.overview?.totalRequests ?? 0)} />
-        <KpiCard label="Total cost" value={formatCostUsd(data.overview?.totalCostUsd ?? '0')} />
+        <KpiCard label="Requisições" value={formatNumber(data.overview?.totalRequests ?? 0)} />
+        <KpiCard label="Custo total" value={formatCostUsd(data.overview?.totalCostUsd ?? '0')} />
         <KpiCard label="Tokens" value={formatNumber(data.overview?.totalTokens ?? 0)} />
         <KpiCard
-          label="Error rate"
+          label="Taxa de erro"
           value={formatPercent(data.overview?.errorRate ?? 0)}
           hint={`p95 ${formatDurationMs(data.overview?.p95LatencyMs ?? null)}`}
         />
       </div>
 
-      <Card title="Requests over time">
+      <Card title="Requisições ao longo do tempo">
         <TimeseriesChart points={data.timeseries} />
       </Card>
 
-      <Card title="Cost by model">
+      <Card title="Custo por modelo">
         <ModelBreakdown items={data.models} />
       </Card>
 
-      <Card title="Recent traces">
+      <Card title="Traces recentes">
         <TracesTable
           traces={data.traces?.items ?? []}
           selectedId={selectedTraceId}

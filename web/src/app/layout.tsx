@@ -16,14 +16,14 @@ const interTight = Inter_Tight({
 
 export const metadata: Metadata = {
   title: 'AI Observability Hub',
-  description: 'Tracing, tokens, cost, latency and metrics for AI applications',
+  description: 'Tracing, tokens, custo, latência e métricas para aplicações de IA',
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>): React.ReactElement {
   return (
-    <html lang="en" className={`${inter.variable} ${interTight.variable}`}>
+    <html lang="pt-BR" className={`${inter.variable} ${interTight.variable}`}>
       <body>{children}</body>
     </html>
   );

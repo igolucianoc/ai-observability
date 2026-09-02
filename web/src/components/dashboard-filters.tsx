@@ -30,7 +30,7 @@ export function DashboardFilters({
   return (
     <div className="flex flex-wrap items-center gap-16">
       <label className="flex items-center gap-8 text-caption text-graphite">
-        Project
+        Projeto
         <select
           className={selectClass}
           value={value.projectId}
@@ -45,16 +45,16 @@ export function DashboardFilters({
       </label>
 
       <label className="flex items-center gap-8 text-caption text-graphite">
-        Period
+        Período
         <select
           className={selectClass}
           value={value.period}
           onChange={(e) => onChange({ ...value, period: e.target.value as DashboardFilterValues['period'] })}
         >
-          <option value="24h">Last 24h</option>
-          <option value="7d">Last 7 days</option>
-          <option value="30d">Last 30 days</option>
-          <option value="all">All time</option>
+          <option value="24h">Últimas 24h</option>
+          <option value="7d">Últimos 7 dias</option>
+          <option value="30d">Últimos 30 dias</option>
+          <option value="all">Todo o período</option>
         </select>
       </label>
 
@@ -65,21 +65,21 @@ export function DashboardFilters({
           value={value.status}
           onChange={(e) => onChange({ ...value, status: e.target.value as DashboardFilterValues['status'] })}
         >
-          <option value="">All</option>
-          <option value="SUCCESS">Success</option>
-          <option value="ERROR">Error</option>
+          <option value="">Todos</option>
+          <option value="SUCCESS">Sucesso</option>
+          <option value="ERROR">Erro</option>
           <option value="TIMEOUT">Timeout</option>
         </select>
       </label>
 
       <label className="flex items-center gap-8 text-caption text-graphite">
-        Model
+        Modelo
         <select
           className={selectClass}
           value={value.model}
           onChange={(e) => onChange({ ...value, model: e.target.value })}
         >
-          <option value="">All</option>
+          <option value="">Todos</option>
           {models.map((model) => (
             <option key={model} value={model}>
               {model}

@@ -2,8 +2,8 @@ import type { ReactElement } from 'react';
 import type { ExecutionStatus } from '@/types/analytics';
 
 const STYLES: Record<ExecutionStatus, { bg: string; text: string; label: string }> = {
-  SUCCESS: { bg: 'bg-mint-mist', text: 'text-pine', label: 'Success' },
-  ERROR: { bg: 'bg-[#fde8e8]', text: 'text-signal-red', label: 'Error' },
+  SUCCESS: { bg: 'bg-mint-mist', text: 'text-pine', label: 'Sucesso' },
+  ERROR: { bg: 'bg-[#fde8e8]', text: 'text-signal-red', label: 'Erro' },
   TIMEOUT: { bg: 'bg-paper', text: 'text-graphite', label: 'Timeout' },
 };
 

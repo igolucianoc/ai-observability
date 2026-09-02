@@ -7,7 +7,7 @@ import type { ModelBreakdownItem } from '@/types/analytics';
  */
 export function ModelBreakdown({ items }: { items: ModelBreakdownItem[] }): ReactElement {
   if (items.length === 0) {
-    return <p className="py-24 text-center text-body text-graphite">No model activity yet.</p>;
+    return <p className="py-24 text-center text-body text-graphite">Nenhuma atividade de modelo ainda.</p>;
   }
 
   return (

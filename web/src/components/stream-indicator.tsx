@@ -2,8 +2,8 @@ import type { ReactElement } from 'react';
 import type { StreamStatus } from '@/hooks/use-dashboard-stream';
 
 const LABELS: Record<StreamStatus, { text: string; dot: string }> = {
-  open: { text: 'Live', dot: 'bg-emerald-pulse' },
-  connecting: { text: 'Connecting…', dot: 'bg-mint-glow' },
+  open: { text: 'Ao vivo', dot: 'bg-emerald-pulse' },
+  connecting: { text: 'Conectando…', dot: 'bg-mint-glow' },
   closed: { text: 'Offline', dot: 'bg-graphite' },
 };
 

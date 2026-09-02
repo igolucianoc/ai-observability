@@ -53,7 +53,7 @@ export function useAuth(): UseAuthResult {
       setUser(me);
       setState('authenticated');
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : 'Login failed';
+      const message = err instanceof ApiError ? err.message : 'Falha no login';
       setError(message);
       setState('anonymous');
       throw err;

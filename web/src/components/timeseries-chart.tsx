@@ -15,7 +15,7 @@ const PADDING = 24;
  */
 export function TimeseriesChart({ points }: TimeseriesChartProps): ReactElement {
   if (points.length === 0) {
-    return <p className="py-32 text-center text-body text-graphite">No data for this period.</p>;
+    return <p className="py-32 text-center text-body text-graphite">Sem dados para este período.</p>;
   }
 
   const maxRequests = Math.max(...points.map((p) => p.requests), 1);
@@ -29,7 +29,7 @@ export function TimeseriesChart({ points }: TimeseriesChartProps): ReactElement 
       viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
       className="w-full"
       role="img"
-      aria-label="Requests over time"
+      aria-label="Requisições ao longo do tempo"
       preserveAspectRatio="xMidYMid meet"
     >
       <line
@@ -59,7 +59,7 @@ export function TimeseriesChart({ points }: TimeseriesChartProps): ReactElement 
               fill="var(--color-emerald-pulse)"
               rx={2}
             >
-              <title>{`${point.bucket}: ${point.requests} requests`}</title>
+              <title>{`${point.bucket}: ${point.requests} requisições`}</title>
             </rect>
             {errorHeight > 0 ? (
               <rect
@@ -70,7 +70,7 @@ export function TimeseriesChart({ points }: TimeseriesChartProps): ReactElement 
                 fill="var(--color-signal-red)"
                 rx={2}
               >
-                <title>{`${point.bucket}: ${point.errorCount} errors`}</title>
+                <title>{`${point.bucket}: ${point.errorCount} erros`}</title>
               </rect>
             ) : null}
           </g>

@@ -11,7 +11,7 @@ export default function HomePage(): ReactElement {
   if (auth.state === 'loading') {
     return (
       <main className="flex min-h-screen items-center justify-center">
-        <p className="text-body text-graphite">Loading…</p>
+        <p className="text-body text-graphite">Carregando…</p>
       </main>
     );
   }

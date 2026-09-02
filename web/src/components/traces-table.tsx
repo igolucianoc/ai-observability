@@ -14,7 +14,7 @@ interface TracesTableProps {
  */
 export function TracesTable({ traces, selectedId, onSelect }: TracesTableProps): ReactElement {
   if (traces.length === 0) {
-    return <p className="py-32 text-center text-body text-graphite">No traces match the filters.</p>;
+    return <p className="py-32 text-center text-body text-graphite">Nenhum trace corresponde aos filtros.</p>;
   }
 
   return (
@@ -24,10 +24,10 @@ export function TracesTable({ traces, selectedId, onSelect }: TracesTableProps):
           <tr className="border-b border-hairline text-left text-caption uppercase text-graphite">
             <th className="py-8 pr-16 font-medium">Trace</th>
             <th className="py-8 pr-16 font-medium">Status</th>
-            <th className="py-8 pr-16 font-medium">Started</th>
-            <th className="py-8 pr-16 text-right font-medium">Duration</th>
+            <th className="py-8 pr-16 font-medium">Início</th>
+            <th className="py-8 pr-16 text-right font-medium">Duração</th>
             <th className="py-8 pr-16 text-right font-medium">Tokens</th>
-            <th className="py-8 text-right font-medium">Cost</th>
+            <th className="py-8 text-right font-medium">Custo</th>
           </tr>
         </thead>
         <tbody>

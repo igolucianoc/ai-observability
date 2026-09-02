@@ -35,11 +35,17 @@ export function LoginForm({ onSubmit, error }: LoginFormProps): ReactElement {
         className="flex w-full max-w-md flex-col gap-24 rounded-2xl border border-hairline bg-snow p-32"
         style={{ boxShadow: 'var(--shadow-subtle)' }}
       >
-        <h1 className="font-[family-name:var(--font-inter-tight)] text-heading font-semibold text-forest-ink">
+        <h1
+          className="font-[family-name:var(--font-inter-tight)] text-heading font-semibold text-transparent bg-clip-text"
+          style={{
+            backgroundImage:
+              'linear-gradient(105deg, var(--color-pine) 0%, var(--color-emerald-pulse) 40%, #a3a02f 100%)',
+          }}
+        >
           AI Observability Hub
         </h1>
         <label className="flex flex-col gap-8 text-caption text-graphite">
-          Email
+          E-mail
           <input
             type="email"
             value={email}
@@ -49,7 +55,7 @@ export function LoginForm({ onSubmit, error }: LoginFormProps): ReactElement {
           />
         </label>
         <label className="flex flex-col gap-8 text-caption text-graphite">
-          Password
+          Senha
           <input
             type="password"
             value={password}
@@ -64,7 +70,7 @@ export function LoginForm({ onSubmit, error }: LoginFormProps): ReactElement {
           disabled={submitting}
           className="rounded-full bg-emerald-pulse px-24 py-8 text-body font-medium text-snow disabled:opacity-60"
         >
-          {submitting ? 'Signing in…' : 'Sign in'}
+          {submitting ? 'Entrando…' : 'Entrar'}
         </button>
       </form>
     </main>

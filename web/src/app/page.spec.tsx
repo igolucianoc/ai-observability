@@ -14,7 +14,7 @@ describe('HomePage', () => {
     render(<HomePage />);
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /entrar/i })).toBeInTheDocument();
     });
   });
 
@@ -39,7 +39,7 @@ describe('HomePage', () => {
     render(<HomePage />);
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /observability/i })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /observabilidade/i })).toBeInTheDocument();
     });
   });
 });
