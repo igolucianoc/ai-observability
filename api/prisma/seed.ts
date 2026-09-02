@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker';
+import { hash } from 'bcrypt';
 import {
   type ErrorKind,
   type ExecutionStatus,
@@ -7,6 +8,13 @@ import {
 } from '@prisma/client';
 
 const prisma = new PrismaClient();
+
+/// Demo credentials for the seeded portfolio account. Synthetic only.
+const DEMO_USER = {
+  email: 'demo@ai-observability.dev',
+  name: 'Demo User',
+  password: 'demo-password-123',
+};
 
 /**
  * Approximate USD price per 1M tokens per model, used to estimate call cost
@@ -209,6 +217,16 @@ async function main(): Promise<void> {
   await prisma.span.deleteMany();
   await prisma.trace.deleteMany();
   await prisma.project.deleteMany();
+  await prisma.refreshToken.deleteMany();
+  await prisma.user.deleteMany();
+
+  const owner = await prisma.user.create({
+    data: {
+      email: DEMO_USER.email,
+      name: DEMO_USER.name,
+      passwordHash: await hash(DEMO_USER.password, 12),
+    },
+  });
 
   const projectSpecs = [
     { name: 'Customer Support Bot', slug: 'customer-support-bot' },
@@ -217,7 +235,7 @@ async function main(): Promise<void> {
   ];
 
   for (const spec of projectSpecs) {
-    const project = await prisma.project.create({ data: spec });
+    const project = await prisma.project.create({ data: { ...spec, ownerId: owner.id } });
 
     // ~40 traces per project, cycling through every scenario so each outcome is
     // well represented for analytics.
@@ -228,6 +246,7 @@ async function main(): Promise<void> {
   }
 
   const counts = {
+    users: await prisma.user.count(),
     projects: await prisma.project.count(),
     traces: await prisma.trace.count(),
     spans: await prisma.span.count(),

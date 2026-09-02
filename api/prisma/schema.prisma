@@ -35,16 +35,56 @@ enum ErrorKind {
   INTERNAL
 }
 
+/// An authenticated account that owns projects.
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String
+  /// bcrypt hash of the password; the plaintext is never stored.
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  projects      Project[]
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+/// A persisted, rotatable refresh token. Only the hash is stored so a database
+/// leak does not expose usable tokens.
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  /// SHA-256 hash of the opaque refresh token value.
+  tokenHash String    @unique
+  /// Groups all tokens derived from a single login, enabling reuse detection.
+  familyId  String
+  expiresAt DateTime
+  /// Set when the token is rotated or explicitly revoked.
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([familyId])
+  @@map("refresh_tokens")
+}
+
 /// A tenant/application whose AI activity is being observed.
 model Project {
   id        String   @id @default(uuid())
+  ownerId   String
   name      String
   slug      String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  owner  User    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   traces Trace[]
 
+  @@index([ownerId])
   @@map("projects")
 }
 
