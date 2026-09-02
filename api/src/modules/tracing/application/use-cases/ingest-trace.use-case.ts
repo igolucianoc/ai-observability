@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BaseUseCase } from '@/core/use-cases/base.use-case';
+import { DashboardEventsService } from '@/modules/events/application/dashboard-events.service';
 import { ProjectAccessDeniedError, ProjectNotFoundError } from '../../domain/errors/tracing.errors';
 import {
   type IngestTraceCommand,
@@ -18,7 +19,10 @@ export interface IngestTraceUseCaseInput {
  */
 @Injectable()
 export class IngestTraceUseCase extends BaseUseCase<IngestTraceUseCaseInput, IngestedTrace> {
-  constructor(private readonly repository: TraceIngestionRepository) {
+  constructor(
+    private readonly repository: TraceIngestionRepository,
+    private readonly events: DashboardEventsService,
+  ) {
     super();
   }
 
@@ -30,6 +34,20 @@ export class IngestTraceUseCase extends BaseUseCase<IngestTraceUseCaseInput, Ing
     if (ownerId !== input.ownerId) {
       throw new ProjectAccessDeniedError();
     }
-    return this.repository.ingest(input.command);
+
+    const ingested = await this.repository.ingest(input.command);
+
+    // Notify dashboard subscribers in near real time.
+    this.events.publish({
+      type: 'trace.ingested',
+      projectId: input.command.projectId,
+      traceId: ingested.traceId,
+      status: input.command.status,
+      totalTokens: ingested.totalTokens,
+      totalCostUsd: ingested.totalCostUsd,
+      at: new Date().toISOString(),
+    });
+
+    return ingested;
   }
 }

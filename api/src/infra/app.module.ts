@@ -6,6 +6,7 @@ import { PrismaModule } from './database/prisma/prisma.module';
 import { JwtAuthGuard } from './http/guards/jwt-auth.guard';
 import { AnalyticsModule } from '@/modules/analytics/analytics.module';
 import { AuthModule } from '@/modules/auth/auth.module';
+import { EventsModule } from '@/modules/events/events.module';
 import { HealthModule } from '@/modules/health/health.module';
 import { TracingModule } from '@/modules/tracing/tracing.module';
 
@@ -17,6 +18,7 @@ import { TracingModule } from '@/modules/tracing/tracing.module';
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
     AuthModule,
     HealthModule,
+    EventsModule,
     TracingModule,
     AnalyticsModule,
   ],

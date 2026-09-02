@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { DashboardEventsService } from '@/modules/events/application/dashboard-events.service';
 import { ProjectAccessDeniedError, ProjectNotFoundError } from '../../domain/errors/tracing.errors';
 import { type IngestTraceCommand } from '../../domain/repositories/trace-ingestion.repository';
 import { InMemoryTraceIngestionRepository } from '../../persistence/repositories/in-memory-trace-ingestion.repository';
@@ -33,6 +34,7 @@ function makeCommand(projectId: string): IngestTraceCommand {
 
 describe('IngestTraceUseCase', () => {
   let repository: InMemoryTraceIngestionRepository;
+  let events: DashboardEventsService;
   let useCase: IngestTraceUseCase;
   const ownerId = randomUUID();
   const projectId = randomUUID();
@@ -40,7 +42,8 @@ describe('IngestTraceUseCase', () => {
   beforeEach(() => {
     repository = new InMemoryTraceIngestionRepository();
     repository.projects.push({ id: projectId, ownerId });
-    useCase = new IngestTraceUseCase(repository);
+    events = new DashboardEventsService();
+    useCase = new IngestTraceUseCase(repository, events);
   });
 
   it('rejects ingestion into a non-existent project', async () => {
@@ -63,5 +66,17 @@ describe('IngestTraceUseCase', () => {
     // gpt-4o: 1M prompt * 2.5 + 1M completion * 10 = 12.5 USD
     expect(result.totalCostUsd).toBe('12.500000');
     expect(repository.traces).toHaveLength(1);
+  });
+
+  it('publishes a trace.ingested event for the project', async () => {
+    const received: string[] = [];
+    const subscription = events
+      .forProject(projectId)
+      .subscribe((event) => received.push(event.traceId));
+
+    const result = await useCase.execute({ ownerId, command: makeCommand(projectId) });
+    subscription.unsubscribe();
+
+    expect(received).toEqual([result.traceId]);
   });
 });
