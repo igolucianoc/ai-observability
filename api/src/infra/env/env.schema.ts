@@ -29,6 +29,18 @@ export const envSchema = z.object({
     .enum(['true', 'false'])
     .default('false')
     .transform((value) => value === 'true'),
+  /// Hugging Face Inference API token. When absent or empty, AI insights run in
+  /// mock mode. An empty string (common from compose defaults) is treated as unset.
+  HF_API_TOKEN: z
+    .string()
+    .optional()
+    .transform((value) => (value && value.length > 0 ? value : undefined)),
+  /// Model used for the trace explanation feature.
+  HF_MODEL: z.string().default('HuggingFaceH4/zephyr-7b-beta'),
+  /// Timeout (ms) for a Hugging Face call, so a slow provider can't hang requests.
+  HF_TIMEOUT_MS: z.coerce.number().int().positive().default(10_000),
+  /// Cap on generated tokens, to bound cost and latency.
+  HF_MAX_NEW_TOKENS: z.coerce.number().int().positive().max(1000).default(180),
 });
 
 export type Env = z.infer<typeof envSchema>;

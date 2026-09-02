@@ -22,5 +22,6 @@ import { ReadTraceController } from './presentation/controllers/read-trace.contr
     { provide: TraceIngestionRepository, useClass: PrismaTraceIngestionRepository },
     { provide: TraceReadRepository, useClass: PrismaTraceReadRepository },
   ],
+  exports: [TraceReadRepository],
 })
 export class TracingModule {}

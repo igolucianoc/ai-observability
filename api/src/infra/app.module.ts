@@ -10,6 +10,7 @@ import { AnalyticsModule } from '@/modules/analytics/analytics.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { EventsModule } from '@/modules/events/events.module';
 import { HealthModule } from '@/modules/health/health.module';
+import { InsightsModule } from '@/modules/insights/insights.module';
 import { ProjectsModule } from '@/modules/projects/projects.module';
 import { TracingModule } from '@/modules/tracing/tracing.module';
 
@@ -25,6 +26,7 @@ import { TracingModule } from '@/modules/tracing/tracing.module';
     ProjectsModule,
     TracingModule,
     AnalyticsModule,
+    InsightsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
