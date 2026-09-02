@@ -44,4 +44,8 @@ export abstract class AnalyticsRepository {
     filter: AnalyticsFilter,
     bucket: TimeseriesBucket,
   ): Promise<TimeseriesPoint[]>;
+  /// Remove todos os traces (e cascata: spans, chamadas, uso, erros) dos
+  /// projetos do usuário. Os projetos em si são preservados. Retorna a
+  /// quantidade de traces removidos.
+  abstract deleteAllForUser(userId: string): Promise<number>;
 }

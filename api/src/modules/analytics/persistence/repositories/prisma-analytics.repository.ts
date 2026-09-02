@@ -67,6 +67,14 @@ export class PrismaAnalyticsRepository extends AnalyticsRepository {
     return project?.ownerId ?? null;
   }
 
+  async deleteAllForUser(userId: string): Promise<number> {
+    // Cascata de Trace -> Span -> LlmCall/Usage/TraceError cuida dos filhos.
+    const result = await this.prisma.trace.deleteMany({
+      where: { project: { ownerId: userId } },
+    });
+    return result.count;
+  }
+
   async overview(filter: AnalyticsFilter): Promise<OverviewMetrics> {
     const rows = await this.prisma.$queryRaw<OverviewRow[]>`
       SELECT

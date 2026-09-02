@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AnalyticsAccessService } from './application/services/analytics-access.service';
+import { ClearObservabilityDataUseCase } from './application/use-cases/clear-observability-data.use-case';
 import { GetModelBreakdownUseCase } from './application/use-cases/get-model-breakdown.use-case';
 import { GetOverviewUseCase } from './application/use-cases/get-overview.use-case';
 import { GetTimeseriesUseCase } from './application/use-cases/get-timeseries.use-case';
@@ -14,6 +15,7 @@ import { AnalyticsController } from './presentation/controllers/analytics.contro
     GetOverviewUseCase,
     GetModelBreakdownUseCase,
     GetTimeseriesUseCase,
+    ClearObservabilityDataUseCase,
     { provide: AnalyticsRepository, useClass: PrismaAnalyticsRepository },
   ],
 })

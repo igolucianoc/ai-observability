@@ -1,7 +1,19 @@
-import { Controller, ForbiddenException, Get, NotFoundException, Query } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  ForbiddenException,
+  Get,
+  HttpCode,
+  NotFoundException,
+  Query,
+} from '@nestjs/common';
 import { CurrentUser, type AuthenticatedRequestUser } from '@/infra/http/authenticated-user';
 import { ok, type HttpSuccessResponse } from '@/infra/http/http-response';
 import { ZodValidationPipe } from '@/infra/pipes/zod-validation.pipe';
+import {
+  ClearObservabilityDataUseCase,
+  type ClearObservabilityDataResult,
+} from '../../application/use-cases/clear-observability-data.use-case';
 import {
   type AnalyticsFilter,
   type ModelBreakdownItem,
@@ -37,7 +49,18 @@ export class AnalyticsController {
     private readonly getOverview: GetOverviewUseCase,
     private readonly getByModel: GetModelBreakdownUseCase,
     private readonly getTimeseries: GetTimeseriesUseCase,
+    private readonly clearData: ClearObservabilityDataUseCase,
   ) {}
+
+  /// Apaga todos os traces dos projetos do usuário autenticado. Destrutivo e
+  /// irreversível; o frontend confirma com o usuário antes de chamar.
+  @Delete('data')
+  @HttpCode(200)
+  async clear(
+    @CurrentUser() current: AuthenticatedRequestUser,
+  ): Promise<HttpSuccessResponse<ClearObservabilityDataResult>> {
+    return ok(await this.clearData.execute({ userId: current.id }));
+  }
 
   @Get('overview')
   async overview(

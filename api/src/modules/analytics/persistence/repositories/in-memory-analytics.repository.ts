@@ -38,6 +38,20 @@ export class InMemoryAnalyticsRepository extends AnalyticsRepository {
     return Promise.resolve(this.projects.find((p) => p.id === projectId)?.ownerId ?? null);
   }
 
+  deleteAllForUser(userId: string): Promise<number> {
+    const ownedProjectIds = new Set(
+      this.projects.filter((p) => p.ownerId === userId).map((p) => p.id),
+    );
+    let deleted = 0;
+    for (let i = this.traces.length - 1; i >= 0; i -= 1) {
+      if (ownedProjectIds.has(this.traces[i].projectId)) {
+        this.traces.splice(i, 1);
+        deleted += 1;
+      }
+    }
+    return Promise.resolve(deleted);
+  }
+
   private select(filter: AnalyticsFilter): InMemoryTrace[] {
     return this.traces.filter((trace) => {
       if (trace.projectId !== filter.projectId) return false;
