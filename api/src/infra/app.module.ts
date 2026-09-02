@@ -4,6 +4,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { EnvModule } from './env/env.module';
 import { PrismaModule } from './database/prisma/prisma.module';
 import { JwtAuthGuard } from './http/guards/jwt-auth.guard';
+import { AnalyticsModule } from '@/modules/analytics/analytics.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { HealthModule } from '@/modules/health/health.module';
 import { TracingModule } from '@/modules/tracing/tracing.module';
@@ -17,6 +18,7 @@ import { TracingModule } from '@/modules/tracing/tracing.module';
     AuthModule,
     HealthModule,
     TracingModule,
+    AnalyticsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
