@@ -1,13 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { EnvService } from '@/infra/env/env.service';
-import { type InferenceRequest, InferenceProvider } from './inference-provider';
+import {
+  type InferenceRequest,
+  type InferenceResult,
+  InferenceProvider,
+} from './inference-provider';
 
-/// The provider's response is untrusted; validate its shape before use.
-const hfResponseSchema = z.union([
-  z.array(z.object({ generated_text: z.string() })),
-  z.object({ generated_text: z.string() }),
-]);
+/// Resposta OpenAI-compatible do router de Inference Providers do Hugging Face.
+/// É conteúdo não confiável; validamos o formato antes de usar.
+const hfChatResponseSchema = z.object({
+  choices: z
+    .array(
+      z.object({
+        message: z.object({ content: z.string().nullable() }),
+      }),
+    )
+    .min(1),
+  usage: z
+    .object({
+      prompt_tokens: z.number().int().nonnegative(),
+      completion_tokens: z.number().int().nonnegative(),
+    })
+    .optional(),
+});
 
 export class InferenceProviderError extends Error {
   constructor(message: string) {
@@ -28,7 +44,7 @@ export class HuggingFaceInferenceProvider extends InferenceProvider {
     super();
   }
 
-  async generate(request: InferenceRequest): Promise<string> {
+  async generateResult(request: InferenceRequest): Promise<InferenceResult> {
     const token = this.env.get('HF_API_TOKEN');
     if (!token) {
       throw new InferenceProviderError('Hugging Face token is not configured');
@@ -38,39 +54,45 @@ export class HuggingFaceInferenceProvider extends InferenceProvider {
     const timeout = setTimeout(() => controller.abort(), this.env.get('HF_TIMEOUT_MS'));
 
     try {
-      const response = await fetch(
-        `https://api-inference.huggingface.co/models/${this.env.get('HF_MODEL')}`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            inputs: request.prompt,
-            parameters: { max_new_tokens: request.maxNewTokens, return_full_text: false },
-          }),
-          signal: controller.signal,
+      // Endpoint atual de Inference Providers do Hugging Face (OpenAI-compatible).
+      const response = await fetch('https://router.huggingface.co/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-      );
+        body: JSON.stringify({
+          model: request.model ?? this.env.get('HF_MODEL'),
+          messages: [{ role: 'user', content: request.prompt }],
+          max_tokens: request.maxNewTokens,
+        }),
+        signal: controller.signal,
+      });
 
       if (!response.ok) {
         throw new InferenceProviderError(`Hugging Face responded with ${response.status}`);
       }
 
       const json: unknown = await response.json();
-      const parsed = hfResponseSchema.safeParse(json);
+      const parsed = hfChatResponseSchema.safeParse(json);
       if (!parsed.success) {
         throw new InferenceProviderError('Unexpected response shape from Hugging Face');
       }
 
-      const text = Array.isArray(parsed.data)
-        ? parsed.data[0]?.generated_text
-        : parsed.data.generated_text;
+      const text = parsed.data.choices[0]?.message.content?.trim();
       if (!text) {
         throw new InferenceProviderError('Empty generation from Hugging Face');
       }
-      return text.trim();
+
+      return {
+        text,
+        usage: parsed.data.usage
+          ? {
+              promptTokens: parsed.data.usage.prompt_tokens,
+              completionTokens: parsed.data.usage.completion_tokens,
+            }
+          : undefined,
+      };
     } catch (error) {
       if (error instanceof InferenceProviderError) {
         throw error;

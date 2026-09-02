@@ -26,11 +26,32 @@ describe('HuggingFaceInferenceProvider', () => {
 
   it('returns the generated text on success', async () => {
     vi.spyOn(global, 'fetch').mockResolvedValue(
-      new Response(JSON.stringify([{ generated_text: '  the answer  ' }]), { status: 200 }),
+      new Response(
+        JSON.stringify({ choices: [{ message: { content: '  the answer  ' } }] }),
+        { status: 200 },
+      ),
     );
     const provider = new HuggingFaceInferenceProvider(makeEnv());
 
     await expect(provider.generate(request)).resolves.toBe('the answer');
+  });
+
+  it('returns reported token usage when present', async () => {
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          choices: [{ message: { content: 'hi' } }],
+          usage: { prompt_tokens: 12, completion_tokens: 3 },
+        }),
+        { status: 200 },
+      ),
+    );
+    const provider = new HuggingFaceInferenceProvider(makeEnv());
+
+    await expect(provider.generateResult(request)).resolves.toEqual({
+      text: 'hi',
+      usage: { promptTokens: 12, completionTokens: 3 },
+    });
   });
 
   it('throws when no token is configured', async () => {

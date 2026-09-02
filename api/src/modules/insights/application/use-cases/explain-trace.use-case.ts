@@ -73,9 +73,10 @@ export class ExplainTraceUseCase extends BaseUseCase<ExplainTraceInput, TraceExp
     ].join('; ');
 
     return (
-      'You are an observability assistant. In 2-3 sentences, explain the likely ' +
-      'cause of the following AI trace outcome and suggest one next step. ' +
-      `Do not invent details beyond the signals given. Signals: ${facts}.`
+      'Você é um assistente de observabilidade. Responda em português do Brasil. ' +
+      'Em 2 a 3 frases, explique a provável causa do resultado do trace de IA a seguir ' +
+      'e sugira um próximo passo. Não invente detalhes além dos sinais fornecidos. ' +
+      `Sinais: ${facts}.`
     );
   }
 }
