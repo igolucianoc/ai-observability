@@ -1,59 +1,57 @@
-# Observability of the system itself
+# Observabilidade do próprio sistema
 
-This document describes how the **API observes itself** — distinct from the AI
-traces it ingests as its domain. The two never mix: self-telemetry is written to
-stdout as structured logs and is **never** ingested as domain traces, so there
-is no observability loop.
+Este documento descreve como a **API observa a si mesma** — algo distinto dos traces de IA que ela
+ingere como domínio. Os dois nunca se misturam: a auto-telemetria é escrita no stdout como logs
+estruturados e **nunca** é ingerida como trace de domínio, então não há loop de observabilidade.
 
-## On-call questions this answers
+## Perguntas de plantão que isto responde
 
-1. Are the API routes responding, and with what latency and error rate?
-2. When a request fails, which request was it and what was the outcome?
+1. As rotas da API estão respondendo, e com que latência e taxa de erro?
+2. Quando uma requisição falha, qual foi ela e qual o resultado?
 
-## What is captured
+## O que é capturado
 
-Every request emits one structured JSON log line (`event: "http_request"`) with:
+Cada requisição emite uma linha de log JSON estruturada (`event: "http_request"`) com:
 
-| Field | Example | Why |
-|-------|---------|-----|
-| `requestId` | `9f1c…` | Correlation id, also returned in the `x-request-id` response header |
-| `method` | `POST` | RED — request identity |
-| `route` | `/api/traces/:id` | Route **template**, not the raw URL (bounded cardinality) |
-| `statusClass` | `2xx` / `4xx` / `5xx` | RED — errors, as a low-cardinality class |
-| `durationMs` | `42` | RED — duration |
-| `service`, `level`, `time` | — | Standard envelope on every line |
+| Campo | Exemplo | Por quê |
+|-------|---------|---------|
+| `requestId` | `9f1c…` | Correlation id, também devolvido no header de resposta `x-request-id` |
+| `method` | `POST` | RED — identidade da requisição |
+| `route` | `/api/traces/:id` | **Template** da rota, não a URL crua (cardinalidade limitada) |
+| `statusClass` | `2xx` / `4xx` / `5xx` | RED — erros, como classe de baixa cardinalidade |
+| `durationMs` | `42` | RED — duração |
+| `service`, `level`, `time` | — | Envelope padrão em toda linha |
 
-An inbound `x-request-id` header is honored (for cross-service correlation);
-otherwise a new id is generated per request.
+Um header `x-request-id` de entrada é respeitado (para correlação entre serviços); caso contrário,
+um novo id é gerado por requisição.
 
-## What is NOT captured
+## O que NÃO é capturado
 
-- **No secrets or tokens.** `password`, `passwordHash`, `token`, `accessToken`,
-  `refreshToken`, `authorization`, `cookie`, `set-cookie` and the JWT secrets are
-  redacted by `redact()` before any line is written.
-- **No PII in metrics-shaped fields.** User ids, emails, raw URLs and error
-  message text are never used as `route`/`statusClass` labels (they would blow up
-  cardinality and leak data). User identity, when needed, belongs in a specific
-  log event, not in the aggregate `http_request` line.
-- **No request or response bodies.** Payloads are not logged.
-- **No exact HTTP status as a label** — only the class (`2xx`…), to keep the
-  signal aggregatable.
+- **Nenhum segredo ou token.** `password`, `passwordHash`, `token`, `accessToken`, `refreshToken`,
+  `authorization`, `cookie`, `set-cookie` e os segredos JWT são redigidos por `redact()` antes de
+  qualquer linha ser escrita.
+- **Nenhuma PII em campos de métrica.** Ids de usuário, e-mails, URLs cruas e texto de mensagem de
+  erro nunca são usados como labels `route`/`statusClass` (estourariam a cardinalidade e vazariam
+  dados). A identidade do usuário, quando necessária, vai em um evento de log específico, não na
+  linha agregada `http_request`.
+- **Nenhum corpo de requisição ou resposta.** Payloads não são logados.
+- **Nenhum status HTTP exato como label** — apenas a classe (`2xx`…), para manter o sinal
+  agregável.
 
-## Why no distributed tracing (OpenTelemetry)
+## Por que não há tracing distribuído (OpenTelemetry)
 
-Deliberately omitted. This is a single-service API, and the term "trace" already
-means an AI execution in the product domain — emitting OTel spans would both add
-little value for one service and invite confusion with domain traces. Structured
-logs with a correlation id answer the on-call questions here. If the system grows
-into multiple services, OTel auto-instrumentation is the natural next step.
+Omitido de propósito. Esta é uma API de serviço único, e o termo "trace" já significa uma execução
+de IA no domínio do produto — emitir spans OTel traria pouco valor para um serviço só e ainda
+convidaria à confusão com os traces de domínio. Logs estruturados com correlation id respondem às
+perguntas de plantão aqui. Se o sistema crescer para múltiplos serviços, a auto-instrumentação do
+OTel é o próximo passo natural.
 
-## Avoiding observability loops
+## Como evita loops de observabilidade
 
-The self-observability path is stdout-only. It does not call `POST /api/traces/ingest`,
-does not write to the database, and does not subscribe to the SSE stream. Observing
-the API therefore produces no domain traffic that would be observed again.
+O caminho de auto-observabilidade é apenas stdout. Ele não chama `POST /api/traces/ingest`, não
+escreve no banco e não assina o stream SSE. Observar a API, portanto, não produz tráfego de domínio
+que seria observado novamente.
 
-## Configuration
+## Configuração
 
-- `LOG_LEVEL` (`debug` | `info` | `warn` | `error`, default `info`) controls the
-  minimum level written.
+- `LOG_LEVEL` (`debug` | `info` | `warn` | `error`, padrão `info`) controla o nível mínimo escrito.

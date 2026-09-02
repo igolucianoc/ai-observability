@@ -1,9 +1,10 @@
-# Documentation
+# Documentação
 
-Technical documentation for the AI Observability Hub.
+Documentação técnica do AI Observability Hub.
 
-## Index
+## Índice
 
-- Architecture — see the root [`README.md`](../README.md) and the prompt-driven design notes.
+- [Observabilidade do próprio sistema](./observability.md) — logs estruturados, correlation id e o que é (e não é) capturado.
+- Arquitetura e stack — veja o [`README.md`](../README.md) da raiz.
 
-> Documentation is added incrementally as features land. This folder starts as a placeholder during bootstrap.
+> Os comentários e identificadores no código são mantidos em inglês; esta documentação é em português.
