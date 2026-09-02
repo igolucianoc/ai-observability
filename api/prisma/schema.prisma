@@ -1,0 +1,160 @@
+// AI Observability Hub — data model
+// trace -> span -> llm call -> usage / error, grouped under a project.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Overall outcome of a trace or span.
+enum ExecutionStatus {
+  SUCCESS
+  ERROR
+  TIMEOUT
+}
+
+/// Kind of work a span represents within a trace.
+enum SpanKind {
+  LLM
+  RETRIEVAL
+  TOOL
+  EMBEDDING
+  CHAIN
+}
+
+/// Category of a captured error, used for aggregations.
+enum ErrorKind {
+  PROVIDER_ERROR
+  TIMEOUT
+  RATE_LIMIT
+  VALIDATION
+  INTERNAL
+}
+
+/// A tenant/application whose AI activity is being observed.
+model Project {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  traces Trace[]
+
+  @@map("projects")
+}
+
+/// A single end-to-end execution (e.g. one request through an AI pipeline).
+model Trace {
+  id            String          @id @default(uuid())
+  projectId     String
+  /// Client-provided correlation id to tie external requests to a trace.
+  correlationId String
+  name          String
+  status        ExecutionStatus
+  startedAt     DateTime
+  endedAt       DateTime?
+  /// Total wall-clock duration in milliseconds.
+  durationMs    Int?
+  /// Denormalized rollups for fast dashboard reads.
+  totalTokens   Int             @default(0)
+  totalCostUsd  Decimal         @default(0) @db.Decimal(12, 6)
+  metadata      Json?
+  createdAt     DateTime        @default(now())
+
+  project Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  spans   Span[]
+  errors  TraceError[]
+
+  @@index([projectId, startedAt])
+  @@index([status])
+  @@index([correlationId])
+  @@map("traces")
+}
+
+/// A unit of work inside a trace. Spans can nest via parentSpanId.
+model Span {
+  id           String          @id @default(uuid())
+  traceId      String
+  parentSpanId String?
+  name         String
+  kind         SpanKind
+  status       ExecutionStatus
+  startedAt    DateTime
+  endedAt      DateTime?
+  durationMs   Int?
+  metadata     Json?
+  createdAt    DateTime        @default(now())
+
+  trace       Trace        @relation(fields: [traceId], references: [id], onDelete: Cascade)
+  parentSpan  Span?        @relation("SpanChildren", fields: [parentSpanId], references: [id], onDelete: SetNull)
+  childSpans  Span[]       @relation("SpanChildren")
+  llmCall     LlmCall?
+  errors      TraceError[]
+
+  @@index([traceId])
+  @@index([parentSpanId])
+  @@index([kind])
+  @@map("spans")
+}
+
+/// A single call to an LLM provider, attached one-to-one to an LLM span.
+model LlmCall {
+  id           String   @id @default(uuid())
+  spanId       String   @unique
+  provider     String
+  model        String
+  temperature  Float?
+  /// Latency of the provider call in milliseconds.
+  latencyMs    Int?
+  /// Estimated cost of this call in USD, derived from token usage.
+  costUsd      Decimal  @default(0) @db.Decimal(12, 6)
+  requestText  String?
+  responseText String?
+  createdAt    DateTime @default(now())
+
+  span  Span  @relation(fields: [spanId], references: [id], onDelete: Cascade)
+  usage Usage?
+
+  @@index([model])
+  @@index([provider])
+  @@map("llm_calls")
+}
+
+/// Token usage for an LLM call.
+model Usage {
+  id           String   @id @default(uuid())
+  llmCallId    String   @unique
+  promptTokens Int      @default(0)
+  completionTokens Int  @default(0)
+  totalTokens  Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  llmCall LlmCall @relation(fields: [llmCallId], references: [id], onDelete: Cascade)
+
+  @@map("usage")
+}
+
+/// An error captured during a trace, optionally tied to a specific span.
+model TraceError {
+  id        String    @id @default(uuid())
+  traceId   String
+  spanId    String?
+  kind      ErrorKind
+  message   String
+  /// Provider/library specific error code when available.
+  code      String?
+  metadata  Json?
+  createdAt DateTime  @default(now())
+
+  trace Trace @relation(fields: [traceId], references: [id], onDelete: Cascade)
+  span  Span? @relation(fields: [spanId], references: [id], onDelete: SetNull)
+
+  @@index([traceId])
+  @@index([kind])
+  @@map("trace_errors")
+}
