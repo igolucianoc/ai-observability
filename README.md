@@ -42,6 +42,10 @@ docker compose up --build
 - Web: http://localhost:3000
 - API: http://localhost:3333
 
+> If ports 3000, 3333, 5432 or 6379 are already taken on your machine, override
+> the host ports in `.env` (`WEB_PORT`, `API_PORT`, `POSTGRES_PORT`, `REDIS_PORT`)
+> before running.
+
 ### Option B — Local development
 
 ```bash
@@ -59,6 +63,13 @@ npm run dev
 | `npm run test` | Runs tests for `api` and `web` |
 | `npm run lint` | Lints `api` and `web` |
 | `npm run typecheck` | Type-checks `api` and `web` |
+
+## Known issues
+
+- `npm audit` reports advisories in a **transitive `postcss`** pulled in by
+  Next.js 15. The only current fix bumps Next.js to a major version (breaking),
+  which is out of scope for the pinned stack. Tracked for a later dependency
+  review.
 
 ## Documentation
 
