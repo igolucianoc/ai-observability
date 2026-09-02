@@ -1,9 +1,11 @@
-import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import { type MiddlewareConsumer, Module, type NestModule } from '@nestjs/common';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { EnvModule } from './env/env.module';
 import { PrismaModule } from './database/prisma/prisma.module';
 import { JwtAuthGuard } from './http/guards/jwt-auth.guard';
+import { HttpLoggingInterceptor } from './observability/http-logging.interceptor';
+import { RequestContextMiddleware } from './observability/request-context.middleware';
 import { AnalyticsModule } from '@/modules/analytics/analytics.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { EventsModule } from '@/modules/events/events.module';
@@ -27,6 +29,11 @@ import { TracingModule } from '@/modules/tracing/tracing.module';
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_INTERCEPTOR, useClass: HttpLoggingInterceptor },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(RequestContextMiddleware).forRoutes('*');
+  }
+}
