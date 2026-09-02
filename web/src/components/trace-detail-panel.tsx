@@ -53,6 +53,8 @@ export function TraceDetailPanel({ traceId, onClose }: TraceDetailPanelProps): R
   const [detail, setDetail] = useState<TraceDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [explanation, setExplanation] = useState<string | null>(null);
+  const [explaining, setExplaining] = useState(false);
 
   useEffect(() => {
     if (!traceId) {
@@ -62,6 +64,7 @@ export function TraceDetailPanel({ traceId, onClose }: TraceDetailPanelProps): R
     let active = true;
     setLoading(true);
     setError(null);
+    setExplanation(null);
     api
       .traceDetail(traceId)
       .then((result) => {
@@ -71,7 +74,7 @@ export function TraceDetailPanel({ traceId, onClose }: TraceDetailPanelProps): R
       })
       .catch(() => {
         if (active) {
-          setError('Failed to load trace detail.');
+          setError('Falha ao carregar o detalhe do trace.');
         }
       })
       .finally(() => {
@@ -84,6 +87,21 @@ export function TraceDetailPanel({ traceId, onClose }: TraceDetailPanelProps): R
     };
   }, [traceId]);
 
+  const handleExplain = async (): Promise<void> => {
+    if (!traceId) {
+      return;
+    }
+    setExplaining(true);
+    try {
+      const result = await api.explainTrace(traceId);
+      setExplanation(result.explanation);
+    } catch {
+      setExplanation('Could not generate an explanation right now.');
+    } finally {
+      setExplaining(false);
+    }
+  };
+
   if (!traceId) {
     return null;
   }
@@ -92,22 +110,22 @@ export function TraceDetailPanel({ traceId, onClose }: TraceDetailPanelProps): R
     <aside
       className="fixed right-0 top-0 z-10 flex h-full w-full max-w-xl flex-col gap-24 overflow-y-auto border-l border-hairline bg-snow p-32"
       style={{ boxShadow: 'var(--shadow-subtle)' }}
-      aria-label="Trace detail"
+      aria-label="Detalhe do trace"
     >
       <div className="flex items-start justify-between">
         <h2 className="font-[family-name:var(--font-inter-tight)] text-heading-sm font-semibold text-forest-ink">
-          {detail?.name ?? 'Trace detail'}
+          {detail?.name ?? 'Detalhe do trace'}
         </h2>
         <button
           type="button"
           onClick={onClose}
           className="rounded-full border border-hairline px-16 py-8 text-caption text-forest-ink hover:bg-paper"
         >
-          Close
+          Fechar
         </button>
       </div>
 
-      {loading ? <p className="text-body text-graphite">Loading…</p> : null}
+      {loading ? <p className="text-body text-graphite">Carregando…</p> : null}
       {error ? <p className="text-body text-signal-red">{error}</p> : null}
 
       {detail ? (
@@ -121,6 +139,25 @@ export function TraceDetailPanel({ traceId, onClose }: TraceDetailPanelProps): R
           </div>
 
           <section className="flex flex-col gap-8">
+            <div className="flex items-center justify-between">
+              <h3 className="text-caption font-medium uppercase text-graphite">AI explanation</h3>
+              <button
+                type="button"
+                onClick={handleExplain}
+                disabled={explaining}
+                className="rounded-full bg-emerald-pulse px-16 py-8 text-caption font-medium text-snow disabled:opacity-60"
+              >
+                {explaining ? 'Analyzing…' : 'Explain with AI'}
+              </button>
+            </div>
+            {explanation ? (
+              <p className="rounded-2xl border border-hairline bg-mint-mist p-16 text-body text-forest-ink">
+                {explanation}
+              </p>
+            ) : null}
+          </section>
+
+          <section className="flex flex-col gap-8">
             <h3 className="text-caption font-medium uppercase text-graphite">Spans</h3>
             <div className="rounded-2xl border border-hairline px-16">
               {detail.spans.map((span) => (
@@ -131,7 +168,7 @@ export function TraceDetailPanel({ traceId, onClose }: TraceDetailPanelProps): R
 
           {detail.errors.length > 0 ? (
             <section className="flex flex-col gap-8">
-              <h3 className="text-caption font-medium uppercase text-graphite">Errors</h3>
+              <h3 className="text-caption font-medium uppercase text-graphite">Erros</h3>
               {detail.errors.map((err, index) => (
                 <div
                   key={`${err.kind}-${index}`}

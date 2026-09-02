@@ -7,6 +7,7 @@ import type {
   ProjectSummary,
   TimeseriesPoint,
   TraceDetail,
+  TraceExplanation,
   TraceListPage,
 } from '@/types/analytics';
 
@@ -125,6 +126,12 @@ const paginationMetaSchema = z.object({
   totalPages: z.number(),
 });
 
+const traceExplanationSchema = z.object({
+  traceId: z.string(),
+  explanation: z.string(),
+  provider: z.string(),
+});
+
 export interface AnalyticsFilterParams {
   projectId: string;
   from?: string;
@@ -182,5 +189,11 @@ export const api = {
 
   traceDetail(id: string): Promise<TraceDetail> {
     return apiGet(`/traces/${encodeURIComponent(id)}`, traceDetailSchema);
+  },
+
+  explainTrace(id: string): Promise<TraceExplanation> {
+    return apiRequest(`/insights/traces/${encodeURIComponent(id)}/explain`, traceExplanationSchema, {
+      method: 'POST',
+    }).then((r) => r.data);
   },
 };

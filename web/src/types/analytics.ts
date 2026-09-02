@@ -113,3 +113,9 @@ export interface TraceDetail {
   spans: TraceDetailSpan[];
   errors: TraceDetailError[];
 }
+
+export interface TraceExplanation {
+  traceId: string;
+  explanation: string;
+  provider: string;
+}
