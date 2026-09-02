@@ -6,7 +6,9 @@ export default defineConfig({
   test: {
     globals: true,
     root: './',
-    include: ['src/**/*.spec.ts', 'src/**/*.test.ts'],
+    include: ['src/**/*.spec.ts', 'src/**/*.test.ts', 'test/**/*.e2e-spec.ts'],
+    setupFiles: ['test/setup-env.ts'],
+    testTimeout: 20_000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
