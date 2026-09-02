@@ -97,6 +97,11 @@ export function Dashboard({ user, onLogout }: DashboardProps): ReactElement {
             Observabilidade
           </h1>
           <StreamIndicator status={stream.status} />
+          {data.loading ? (
+            <span className="text-caption text-graphite" aria-live="polite">
+              Carregando…
+            </span>
+          ) : null}
         </div>
         <div className="flex items-center gap-16 text-caption text-graphite">
           <span>{user.email}</span>
@@ -116,6 +121,10 @@ export function Dashboard({ user, onLogout }: DashboardProps): ReactElement {
         value={filters}
         onChange={setFilters}
       />
+
+      {projects.length === 0 ? (
+        <p className="text-body text-graphite">Nenhum projeto encontrado para esta conta.</p>
+      ) : null}
 
       {data.error ? <p className="text-body text-signal-red">{data.error}</p> : null}
 
